@@ -89,6 +89,14 @@ input:focus {
     border-color: #4F46E5;
     box-shadow: 0 0 0 2px rgba(79,70,229,0.15);
 }
+        label{
+    display:block;
+   margin:14px 0 8px;
+font-size:13px;
+color:#94A3B8;
+font-weight:500;
+letter-spacing:0.3px;
+}
 
         button {
             width: 100%;
@@ -156,16 +164,41 @@ input:focus {
             </div>
         </div>
         <div class="section">
-            <h3>Personal</h3><input id="age" placeholder="Age"><input id="weight" placeholder="Weight"><input
-                id="height" placeholder="Height">
-        </div>
+    <h3>👤 Personal</h3>
+
+    <label>Age</label>
+    <input id="age">
+
+    <label>Weight</label>
+    <input id="weight">
+
+    <label>Height</label>
+    <input id="height">
+</div>
         <div class="section">
-            <h3>Performance</h3><input id="vo2" placeholder="VO2 Max"><input id="hrv" placeholder="HRV"><input id="rhr"
-                placeholder="Resting HR">
-        </div>
+    <h3>⚡ Performance</h3>
+
+    <label>VO2 Max</label>
+    <input id="vo2">
+
+    <label>HRV</label>
+    <input id="hrv">
+
+    <label>Resting HR</label>
+    <input id="rhr">
+</div>
         <div class="section">
-            <h3>Lifestyle</h3><input id="sleep" placeholder="Sleep Score"><input id="steps"
-                placeholder="Daily Steps"><input id="train" placeholder="Training Sessions">
+    <h3>🌙 Lifestyle</h3>
+
+    <label>Sleep Score</label>
+    <input id="sleep">
+
+    <label>Daily Steps</label>
+    <input id="steps">
+
+    <label>Training Sessions</label>
+    <input id="train">
+</div>
         </div><button onclick="calculate()">Analyze Health</button>
         <div class="report" id="report"></div>
     </div>
