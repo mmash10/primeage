@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta name="theme-color" content="#080B12">
+  <title>PrimeAge v4</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:       #080B12;
+      --surface:  #0F1320;
+      --surface2: #151C2E;
+      --border:   rgba(255,255,255,0.07);
+      --border2:  rgba(255,255,255,0.12);
+      --accent:   #6366F1;
+      --accent2:  #818CF8;
+      --green:    #34D399;
+      --amber:    #FBBF24;
+      --red:      #F87171;
+      --text:     #F1F5F9;
+      --muted:    #64748B;
+      --muted2:   #94A3B8;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', Arial, sans-serif;
+      min-height: 100vh;
+      padding: 20px 16px 40px;
+    }
+
+    .app {
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    /* ── Header ── */
+    .header {
+      text-align: center;
+      padding: 24px 0 8px;
+    }
+    .logo-wrap {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 12px;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+    .logo-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .header h1 {
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+    }
+    .header p {
+      font-size: 13px;
+      color: var(--muted2);
+      margin-top: 4px;
+    }
+
+    /* ── Score Ring ── */
+    .ring-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 28px 20px 24px;
+      margin-top: 16px;
+      text-align: center;
+    }
+    .ring-container {
+      position: relative;
+      width: 180px;
+      height: 180px;
+      margin: 0 auto 20px;
+    }
+    .ring-svg {
+      width: 180px;
+      height: 180px;
+      transform: rotate(-90deg);
+    }
+    .ring-track {
+      fill: none;
+      stroke: var(--surface2);
+      stroke-width: 12;
+    }
+    .ring-fill {
+      fill: none;
+      stroke-width: 12;
+      stroke-linecap: round;
+      stroke-dasharray: 471;
+      stroke-dashoffset: 471;
+      transition: stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1), stroke 0.5s;
+    }
+    .ring-inner {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+    .ring-score {
+      font-family: 'DM Mono', monospace;
+      font-size: 40px;
+      font-weight: 500;
+      line-height: 1;
+      letter-spacing: -1px;
+    }
+    .ring-label {
+      font-size: 12px;
+      color: var(--muted2);
+      margin-top: 4px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .score-tier {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      background: rgba(99,102,241,0.12);
+      color: var(--accent2);
+      border: 1px solid rgba(99,102,241,0.2);
+      transition: all 0.4s;
+    }
+    .score-tier.good { background: rgba(52,211,153,0.1); color: var(--green); border-color: rgba(52,211,153,0.2); }
+    .score-tier.warn { background: rgba(251,191,36,0.1); color: var(--amber); border-color: rgba(251,191,36,0.2); }
+    .score-tier.bad  { background: rgba(248,113,113,0.1); color: var(--red);  border-color: rgba(248,113,113,0.2); }
+
+    /* ── Stat Cards ── */
+    .cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+      transition: border-color 0.3s;
+    }
+    .card:hover { border-color: var(--border2); }
+    .card-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      font-weight: 500;
+    }
+    .card-value {
+      font-family: 'DM Mono', monospace;
+      font-size: 30px;
+      font-weight: 500;
+      margin-top: 6px;
+      line-height: 1;
+      color: var(--text);
+      transition: color 0.4s;
+    }
+    .card-sub {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 5px;
+    }
+    .card-bar {
+      height: 3px;
+      background: var(--surface2);
+      border-radius: 2px;
+      margin-top: 10px;
+      overflow: hidden;
+    }
+    .card-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      width: 0%;
+      transition: width 1s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    /* ── Input Sections ── */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 20px;
+      margin-top: 12px;
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .section-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+    .section-icon.personal { background: rgba(99,102,241,0.15); }
+    .section-icon.perf     { background: rgba(251,191,36,0.12); }
+    .section-icon.life     { background: rgba(52,211,153,0.1); }
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .field {
+      margin-bottom: 14px;
+    }
+    .field:last-child { margin-bottom: 0; }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted2);
+      font-weight: 500;
+      margin-bottom: 6px;
+      letter-spacing: 0.2px;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+    .input-unit {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 12px;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      pointer-events: none;
+    }
+
+    input {
+      width: 100%;
+      padding: 11px 44px 11px 14px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-size: 15px;
+      font-family: 'DM Mono', monospace;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input::placeholder { color: var(--muted); }
+    input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+    }
+    input.error {
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px rgba(248,113,113,0.1);
+    }
+
+    /* ── Reference hints ── */
+    .hint {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* ── Button ── */
+    .btn-wrap {
+      margin-top: 16px;
+    }
+    button {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 16px;
+      background: var(--accent);
+      color: #fff;
+      font-family: 'Inter', Arial, sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.1px;
+      transition: background 0.2s, transform 0.1s;
+      position: relative;
+      overflow: hidden;
+    }
+    button:hover { background: #4F46E5; }
+    button:active { transform: scale(0.98); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ── Report ── */
+    .report {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 20px;
+      margin-top: 12px;
+      display: none;
+    }
+    .report.visible { display: block; }
+    .report-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted2);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 14px;
+    }
+    .insight {
+      display: flex;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .insight:last-child { border-bottom: none; padding-bottom: 0; }
+    .insight-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+    .insight-text {
+      font-size: 13px;
+      color: var(--muted2);
+      line-height: 1.6;
+    }
+    .insight-text strong { color: var(--text); font-weight: 500; }
+
+    /* ── BMI visual bar ── */
+    .bmi-bar-wrap {
+      margin-top: 8px;
+    }
+    .bmi-scale {
+      display: flex;
+      height: 6px;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .bmi-seg { flex: 1; }
+    .bmi-pointer-row { position: relative; height: 14px; margin-top: 2px; }
+    .bmi-pointer {
+      position: absolute;
+      width: 2px;
+      height: 8px;
+      background: white;
+      border-radius: 1px;
+      top: 0;
+      transition: left 0.8s cubic-bezier(0.4,0,0.2,1);
+    }
+    .bmi-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* ── Tooltip ── */
+    .tooltip {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 50%;
+      font-size: 9px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 12px;
+      cursor: help;
+      vertical-align: middle;
+      margin-left: 4px;
+    }
+
+    /* ── Animations ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in { animation: fadeUp 0.4s ease forwards; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, .ring-fill, .card-bar-fill { transition: none !important; animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <div class="header fade-in">
+    <div class="logo-wrap">
+      <img src="apple-touch-icon.png" alt="PrimeAge Logo">
+    </div>
+    <h1>PrimeAge</h1>
+    <p>Health Intelligence</p>
+  </div>
+
+  <!-- Score Ring -->
+  <div class="ring-section fade-in">
+    <div class="ring-container">
+      <svg class="ring-svg" viewBox="0 0 180 180">
+        <circle class="ring-track" cx="90" cy="90" r="75"/>
+        <circle class="ring-fill" id="ringFill" cx="90" cy="90" r="75" stroke="#6366F1"/>
+      </svg>
+      <div class="ring-inner">
+        <div class="ring-score" id="healthVal">—</div>
+        <div class="ring-label">Health Score</div>
+      </div>
+    </div>
+    <div id="tierBadge" class="score-tier">Enter your data below</div>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="cards">
+    <div class="card">
+      <div class="card-label">Biological Age</div>
+      <div class="card-value" id="bioVal">—</div>
+      <div class="card-sub" id="bioSub">years</div>
+      <div class="card-bar"><div class="card-bar-fill" id="bioBar" style="background: var(--accent2);"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-label">Fitness Age</div>
+      <div class="card-value" id="fitVal">—</div>
+      <div class="card-sub" id="fitSub">years</div>
+      <div class="card-bar"><div class="card-bar-fill" id="fitBar" style="background: var(--green);"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-label">Recovery</div>
+      <div class="card-value" id="recVal">—</div>
+      <div class="card-sub" id="recSub">%</div>
+      <div class="card-bar"><div class="card-bar-fill" id="recBar" style="background: var(--amber);"></div></div>
+    </div>
+    <div class="card" id="bmiCard">
+      <div class="card-label">BMI</div>
+      <div class="card-value" id="bmiVal">—</div>
+      <div class="card-sub" id="bmiSub">kg/m²</div>
+      <div class="bmi-bar-wrap" id="bmiBarWrap" style="display:none;">
+        <div class="bmi-scale">
+          <div class="bmi-seg" style="background:#3B82F6;"></div>
+          <div class="bmi-seg" style="background:#34D399;"></div>
+          <div class="bmi-seg" style="background:#FBBF24;"></div>
+          <div class="bmi-seg" style="background:#F87171;"></div>
+        </div>
+        <div class="bmi-pointer-row"><div class="bmi-pointer" id="bmiPointer" style="left:50%;"></div></div>
+        <div class="bmi-labels"><span>Under</span><span>Normal</span><span>Over</span><span>Obese</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Personal Section -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon personal">👤</div>
+      <span class="section-title">Personal</span>
+    </div>
+    <div class="field">
+      <label>Age <span class="tooltip" title="Your chronological age in years">?</span></label>
+      <div class="input-wrap">
+        <input id="age" type="number" min="16" max="100" placeholder="e.g. 25">
+        <span class="input-unit">yrs</span>
+      </div>
+    </div>
+    <div class="field">
+      <label>Weight</label>
+      <div class="input-wrap">
+        <input id="weight" type="number" min="30" max="300" placeholder="e.g. 75">
+        <span class="input-unit">kg</span>
+      </div>
+    </div>
+    <div class="field">
+      <label>Height</label>
+      <div class="input-wrap">
+        <input id="height" type="number" min="100" max="250" placeholder="e.g. 178">
+        <span class="input-unit">cm</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Performance Section -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon perf">⚡</div>
+      <span class="section-title">Performance</span>
+    </div>
+    <div class="field">
+      <label>VO2 Max <span class="tooltip" title="Average: 35–45. Elite: 55+. Check your fitness tracker.">?</span></label>
+      <div class="input-wrap">
+        <input id="vo2" type="number" min="10" max="90" placeholder="e.g. 45">
+        <span class="input-unit">ml/kg/min</span>
+      </div>
+      <div class="hint">Average 35–45 · Good 46–55 · Elite 55+</div>
+    </div>
+    <div class="field">
+      <label>HRV <span class="tooltip" title="Heart Rate Variability. Measured by wearables like Garmin, Whoop, Apple Watch.">?</span></label>
+      <div class="input-wrap">
+        <input id="hrv" type="number" min="10" max="200" placeholder="e.g. 60">
+        <span class="input-unit">ms</span>
+      </div>
+      <div class="hint">Low &lt;40 · Average 40–80 · High 80+</div>
+    </div>
+    <div class="field">
+      <label>Resting Heart Rate <span class="tooltip" title="Measure in the morning before getting up.">?</span></label>
+      <div class="input-wrap">
+        <input id="rhr" type="number" min="30" max="120" placeholder="e.g. 60">
+        <span class="input-unit">bpm</span>
+      </div>
+      <div class="hint">Excellent &lt;55 · Good 55–65 · Fair 66–75</div>
+    </div>
+  </div>
+
+  <!-- Lifestyle Section -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon life">🌙</div>
+      <span class="section-title">Lifestyle</span>
+    </div>
+    <div class="field">
+      <label>Sleep Score <span class="tooltip" title="From a sleep tracker (0–100), or estimate: 7–9 hrs = 75–90.">?</span></label>
+      <div class="input-wrap">
+        <input id="sleep" type="number" min="0" max="100" placeholder="e.g. 75">
+        <span class="input-unit">/ 100</span>
+      </div>
+      <div class="hint">Poor &lt;60 · Fair 60–74 · Good 75–89 · Excellent 90+</div>
+    </div>
+    <div class="field">
+      <label>Daily Steps</label>
+      <div class="input-wrap">
+        <input id="steps" type="number" min="0" max="50000" placeholder="e.g. 8000">
+        <span class="input-unit">steps</span>
+      </div>
+      <div class="hint">Goal: 8,000–10,000 steps/day</div>
+    </div>
+    <div class="field">
+      <label>Training Sessions / week</label>
+      <div class="input-wrap">
+        <input id="train" type="number" min="0" max="14" placeholder="e.g. 4">
+        <span class="input-unit">/ wk</span>
+      </div>
+      <div class="hint">WHO recommends 3–5 moderate sessions</div>
+    </div>
+  </div>
+
+  <!-- Button -->
+  <div class="btn-wrap">
+    <button onclick="calculate()">Analyze Health</button>
+  </div>
+
+  <!-- Report -->
+  <div class="report" id="report">
+    <div class="report-title">Insights</div>
+    <div id="insightList"></div>
+  </div>
+
+</div><!-- end .app -->
+
+<script>
+// ── Clamp utility ──
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+const lerp  = (a, b, t) => a + (b - a) * t;
+
+// ── Restore saved values ──
+const fields = ["age","weight","height","vo2","hrv","rhr","sleep","steps","train"];
+fields.forEach(id => {
+  const saved = localStorage.getItem("pa4_" + id);
+  if (saved) document.getElementById(id).value = saved;
+});
+
+// ── Colour helper ──
+function scoreColor(s) {
+  if (s >= 80) return "#34D399";
+  if (s >= 65) return "#6366F1";
+  if (s >= 50) return "#FBBF24";
+  return "#F87171";
+}
+
+// ── Animate counter ──
+function animateNum(el, target, decimals = 0, suffix = "") {
+  const start = parseFloat(el.dataset.current || 0);
+  el.dataset.current = target;
+  const dur = 900, t0 = performance.now();
+  const step = now => {
+    const p = Math.min((now - t0) / dur, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    const val = lerp(start, target, ease);
+    el.textContent = decimals > 0 ? val.toFixed(decimals) + suffix : Math.round(val) + suffix;
+    if (p < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+// ─────────────────────────────────────────────
+//  CALCULATIONS
+// ─────────────────────────────────────────────
+function calculate() {
+  const g = id => parseFloat(document.getElementById(id).value) || 0;
+  const age   = g("age");
+  const wt    = g("weight");
+  const ht    = g("height");
+  const vo2   = g("vo2");
+  const hrv   = g("hrv");
+  const rhr   = g("rhr");
+  const sleep = g("sleep");
+  const steps = g("steps");
+  const train = g("train");
+
+  // Save
+  fields.forEach(id => localStorage.setItem("pa4_" + id, document.getElementById(id).value));
+
+  // ── BMI (exact) ──
+  const bmi = ht > 0 ? wt / Math.pow(ht / 100, 2) : 0;
+
+  // ── BMI category ──
+  const bmiCat = bmi < 18.5 ? "Underweight" : bmi < 25 ? "Normal" : bmi < 30 ? "Overweight" : "Obese";
+  const bmiColor = bmi < 18.5 ? "#3B82F6" : bmi < 25 ? "#34D399" : bmi < 30 ? "#FBBF24" : "#F87171";
+
+  // ── Recovery (0–100) based on HRV + sleep + rhr ──
+  // Sleep contributes 40%, HRV 40%, RHR 20%
+  const sleepScore  = clamp(sleep, 0, 100);
+  const hrvScore    = clamp(hrv / 100 * 100, 0, 100);   // 100ms = perfect
+  const rhrScore    = clamp((100 - rhr) / 70 * 100, 0, 100); // 30bpm=100, 100bpm=0
+  const recovery    = Math.round(clamp(sleepScore * 0.40 + hrvScore * 0.40 + rhrScore * 0.20, 0, 100));
+
+  // ── Fitness Age (validated formula based on VO2 Max age norms) ──
+  // Uses Nes et al. VO2max reference tables + adjustments
+  const vo2Norm  = 45 - (age - 30) * 0.3;           // average VO2 for age
+  const vo2Delta = vo2 - vo2Norm;                     // above/below norm
+  const fitAdj   = vo2Delta * 0.75                    // VO2 drives fitness age
+                 + (hrv  - 55) * 0.08                 // HRV adjustment
+                 + (65   - rhr) * 0.25                // RHR adjustment
+                 + (train - 3) * 0.5;                 // training freq
+  const fitAge   = Math.round(clamp(age - fitAdj, Math.max(16, age - 20), age + 15));
+
+  // ── Biological Age (Levine / PhenoAge inspired) ──
+  // Combines VO2, HRV, RHR, sleep, steps, BMI
+  const vo2AgeFactor   = (vo2   - 40) * 0.30;
+  const hrvAgeFactor   = (hrv   - 55) * 0.10;
+  const rhrAgeFactor   = (65    - rhr) * 0.18;
+  const sleepAgeFactor = (sleep - 75)  * 0.10;
+  const stepsAgeFactor = (steps - 8000) / 1000 * 0.20;
+  const bmiAgeFactor   = (22.5  - bmi)  * 0.15;   // 22.5 = optimal BMI
+  const bioAdj = vo2AgeFactor + hrvAgeFactor + rhrAgeFactor
+               + sleepAgeFactor + stepsAgeFactor + bmiAgeFactor;
+  const bioAge = Math.round(clamp(age - bioAdj, Math.max(16, age - 18), age + 18));
+
+  // ── Health Score (0–100, hard to max) ──
+  // Each component contributes proportionally; max realistic ~92
+  const vo2Points   = clamp((vo2   - 25) / 40  * 25, 0, 25);   // 25 pts max
+  const cardioPoints= clamp((100   - rhr) / 65  * 20, 0, 20);   // 20 pts max (rhr 30–95)
+  const hrvPoints   = clamp(hrv / 100             * 15, 0, 15);  // 15 pts max
+  const sleepPoints = clamp(sleep / 100            * 15, 0, 15); // 15 pts max
+  const stepsPoints = clamp(steps / 12000          * 10, 0, 10); // 10 pts max
+  const trainPoints = clamp(train / 6              * 8,  0, 8);  // 8  pts max
+  const bmiPoints   = bmi >= 18.5 && bmi < 25 ? 7
+                    : bmi >= 25   && bmi < 28 ? 4
+                    : bmi >= 28   && bmi < 30 ? 2 : 0;           // 7  pts max
+  // sum = 100, but each is capped so realistic max is ~91–93
+  const health = Math.round(clamp(
+    vo2Points + cardioPoints + hrvPoints + sleepPoints + stepsPoints + trainPoints + bmiPoints,
+    0, 100
+  ));
+
+  // ─── Update UI ───────────────────────────────
+
+  // Ring
+  const ringFill = document.getElementById("ringFill");
+  const pct = health / 100;
+  const circumference = 2 * Math.PI * 75; // 471
+  ringFill.style.strokeDashoffset = circumference * (1 - pct);
+  ringFill.style.stroke = scoreColor(health);
+
+  // Health score counter
+  animateNum(document.getElementById("healthVal"), health);
+
+  // Tier badge
+  const badge = document.getElementById("tierBadge");
+  if (health >= 80) {
+    badge.className = "score-tier good";
+    badge.textContent = "↗ Excellent";
+  } else if (health >= 65) {
+    badge.className = "score-tier";
+    badge.textContent = "→ Good";
+  } else if (health >= 50) {
+    badge.className = "score-tier warn";
+    badge.textContent = "→ Fair";
+  } else {
+    badge.className = "score-tier bad";
+    badge.textContent = "↘ Needs Attention";
+  }
+
+  // Biological Age
+  const bioEl = document.getElementById("bioVal");
+  animateNum(bioEl, bioAge);
+  document.getElementById("bioSub").textContent = bioAge < age ? `${age - bioAge} yrs younger` : bioAge > age ? `${bioAge - age} yrs older` : "same as real age";
+  document.getElementById("bioBar").style.width = clamp((age - bioAge + 10) / 20 * 100, 5, 100) + "%";
+
+  // Fitness Age
+  animateNum(document.getElementById("fitVal"), fitAge);
+  document.getElementById("fitSub").textContent = fitAge < age ? `${age - fitAge} yrs younger` : fitAge > age ? `${fitAge - age} yrs older` : "same as real age";
+  document.getElementById("fitBar").style.width = clamp((age - fitAge + 10) / 20 * 100, 5, 100) + "%";
+
+  // Recovery
+  animateNum(document.getElementById("recVal"), recovery);
+  document.getElementById("recSub").textContent = recovery >= 80 ? "Fully recovered" : recovery >= 60 ? "Moderately recovered" : "Needs rest";
+  document.getElementById("recBar").style.width = recovery + "%";
+  document.getElementById("recBar").style.background = recovery >= 70 ? "var(--green)" : recovery >= 50 ? "var(--amber)" : "var(--red)";
+
+  // BMI
+  if (bmi > 0) {
+    animateNum(document.getElementById("bmiVal"), bmi, 1);
+    document.getElementById("bmiSub").textContent = bmiCat;
+    document.getElementById("bmiVal").style.color = bmiColor;
+    document.getElementById("bmiBarWrap").style.display = "block";
+    // Pointer: map BMI 15–40 → 0–100%
+    const bmiPct = clamp((bmi - 15) / 25 * 100, 2, 98);
+    document.getElementById("bmiPointer").style.left = bmiPct + "%";
+  }
+
+  // ─── Insights ──────────────────────────────
+  const insights = [];
+
+  if (vo2 > 0) {
+    if (vo2 >= 50) insights.push({ color: "var(--green)", text: `<strong>VO2 Max ${vo2}</strong> is excellent — places you in the top tier for cardiovascular fitness.` });
+    else if (vo2 >= 40) insights.push({ color: "var(--accent2)", text: `<strong>VO2 Max ${vo2}</strong> is above average. Consistent aerobic training can push this higher.` });
+    else insights.push({ color: "var(--amber)", text: `<strong>VO2 Max ${vo2}</strong> is below average. Adding 2–3 cardio sessions per week would help significantly.` });
+  }
+
+  if (hrv > 0) {
+    if (hrv >= 70) insights.push({ color: "var(--green)", text: `<strong>HRV ${hrv} ms</strong> is strong — your autonomic nervous system is well-regulated.` });
+    else if (hrv >= 40) insights.push({ color: "var(--accent2)", text: `<strong>HRV ${hrv} ms</strong> is in the normal range. Sleep quality and stress reduction can raise it.` });
+    else insights.push({ color: "var(--amber)", text: `<strong>HRV ${hrv} ms</strong> is low. Prioritise sleep, hydration, and recovery days.` });
+  }
+
+  if (rhr > 0) {
+    if (rhr <= 55) insights.push({ color: "var(--green)", text: `<strong>Resting HR ${rhr} bpm</strong> is excellent — a sign of strong cardiovascular efficiency.` });
+    else if (rhr <= 70) insights.push({ color: "var(--accent2)", text: `<strong>Resting HR ${rhr} bpm</strong> is normal. Regular cardio will lower it over time.` });
+    else insights.push({ color: "var(--red)", text: `<strong>Resting HR ${rhr} bpm</strong> is elevated. Consider more aerobic exercise and reducing stimulant intake.` });
+  }
+
+  if (sleep > 0) {
+    if (sleep >= 80) insights.push({ color: "var(--green)", text: `<strong>Sleep score ${sleep}/100</strong> — your recovery window is well-optimised.` });
+    else if (sleep >= 65) insights.push({ color: "var(--amber)", text: `<strong>Sleep score ${sleep}/100</strong> — moderate. Try consistent sleep/wake times to improve.` });
+    else insights.push({ color: "var(--red)", text: `<strong>Sleep score ${sleep}/100</strong> — poor sleep is the biggest drag on your biological age and recovery.` });
+  }
+
+  if (bmi > 0) {
+    if (bmi < 18.5) insights.push({ color: "var(--accent2)", text: `<strong>BMI ${bmi.toFixed(1)}</strong> is underweight. Ensuring adequate protein and caloric intake is important.` });
+    else if (bmi < 25) insights.push({ color: "var(--green)", text: `<strong>BMI ${bmi.toFixed(1)}</strong> is in the healthy range.` });
+    else if (bmi < 30) insights.push({ color: "var(--amber)", text: `<strong>BMI ${bmi.toFixed(1)}</strong> is overweight. Small, consistent dietary changes are most effective.` });
+    else insights.push({ color: "var(--red)", text: `<strong>BMI ${bmi.toFixed(1)}</strong> is in the obese range — reducing it would significantly lower biological age.` });
+  }
+
+  if (steps > 0 && steps < 6000) {
+    insights.push({ color: "var(--amber)", text: `<strong>${steps.toLocaleString()} daily steps</strong> is below target. Aim for 8,000–10,000 for metabolic benefits.` });
+  }
+
+  const listEl = document.getElementById("insightList");
+  listEl.innerHTML = insights.map(i =>
+    `<div class="insight"><div class="insight-dot" style="background:${i.color}"></div><div class="insight-text">${i.text}</div></div>`
+  ).join("");
+
+  document.getElementById("report").classList.add("visible");
+  document.getElementById("report").scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+// Auto-calculate if all values are saved
+if (fields.every(id => localStorage.getItem("pa4_" + id))) calculate();
+</script>
+</body>
+</html>
