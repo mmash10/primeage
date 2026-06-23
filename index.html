@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PrimeAge v2</title>
+<style>
+:root{
+--bg:#0B0D12;--card:#151922;--accent:#4F46E5;--text:#F8FAFC;--muted:#94A3B8;
+--green:#22C55E;--orange:#F59E0B;
+}
+*{box-sizing:border-box}
+body{
+margin:0;background:var(--bg);color:var(--text);
+font-family:Inter,Arial,sans-serif;
+padding:16px;
+}
+.app{max-width:520px;margin:auto}
+.logo{font-size:42px;font-weight:800;color:var(--accent);text-align:center}
+.tag{text-align:center;color:var(--muted);margin-bottom:20px}
+.card,.hero{
+background:var(--card);
+border-radius:24px;
+padding:18px;
+margin-bottom:12px;
+}
+.hero{text-align:center}
+.hero .score{font-size:54px;font-weight:800}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.metric{text-align:center;background:var(--card);padding:18px;border-radius:24px}
+.metric .value{font-size:28px;font-weight:700}
+label{display:block;margin-bottom:8px;color:var(--muted)}
+input{
+width:100%;padding:14px;border:none;border-radius:14px;
+background:#202533;color:white;font-size:16px;
+}
+button{
+width:100%;padding:16px;border:none;border-radius:18px;
+background:var(--accent);color:white;font-size:17px;font-weight:700;
+cursor:pointer;transition:.2s;
+}
+button:hover{transform:scale(1.02);filter:brightness(1.1)}
+button:active{transform:scale(.98)}
+.report{line-height:1.8}
+.small{color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<div class="app">
+
+<div class="logo">PrimeAge</div>
+<div class="tag">Fitness Age • Recovery • العمر البيولوجي</div>
+
+<div class="hero">
+<div>Health Score</div>
+<div class="score" id="health">0</div>
+</div>
+
+<div class="grid">
+<div class="metric"><div>Fitness Age</div><div class="value" id="fit">0</div></div>
+<div class="metric"><div>Biological Age</div><div class="value" id="bio">0</div></div>
+</div>
+
+<div class="grid">
+<div class="metric"><div>Recovery</div><div class="value" id="recovery">0</div></div>
+<div class="metric"><div>BMI</div><div class="value" id="bmi">0</div></div>
+</div>
+
+<div class="card"><label>Age</label><input id="age" type="number"></div>
+<div class="card"><label>Weight (kg)</label><input id="weight" type="number"></div>
+<div class="card"><label>Height (cm)</label><input id="height" type="number"></div>
+<div class="card"><label>VO₂ Max</label><input id="vo2" type="number"></div>
+<div class="card"><label>HRV (ms)</label><input id="hrv" type="number"></div>
+<div class="card"><label>Resting Heart Rate</label><input id="rhr" type="number"></div>
+<div class="card"><label>Sleep Score (0-100)</label><input id="sleep" type="number"></div>
+<div class="card"><label>Daily Steps</label><input id="steps" type="number"></div>
+<div class="card"><label>Training Sessions / Week</label><input id="train" type="number"></div>
+
+<button onclick="calculate()">تحليل البيانات</button>
+
+<div class="card report" id="report">
+أدخل بياناتك واضغط تحليل البيانات.
+</div>
+
+<div class="small">PrimeAge v2</div>
+
+</div>
+
+<script>
+const ids=["age","weight","height","vo2","hrv","rhr","sleep","steps","train"];
+
+function loadData(){
+ids.forEach(id=>{
+const v=localStorage.getItem(id);
+if(v!==null) document.getElementById(id).value=v;
+});
+}
+function saveData(){
+ids.forEach(id=>localStorage.setItem(id,document.getElementById(id).value));
+}
+
+function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
+
+function calculate(){
+
+const age=+document.getElementById("age").value||0;
+const weight=+document.getElementById("weight").value||0;
+const height=+document.getElementById("height").value||0;
+const vo2=+document.getElementById("vo2").value||0;
+const hrv=+document.getElementById("hrv").value||0;
+const rhr=+document.getElementById("rhr").value||0;
+const sleep=+document.getElementById("sleep").value||0;
+const steps=+document.getElementById("steps").value||0;
+const train=+document.getElementById("train").value||0;
+
+saveData();
+
+const bmi=height>0 ? weight/((height/100)**2) : 0;
+
+let health=50
++(vo2-35)*1.8
++(hrv-40)*0.6
++(70-rhr)*0.8
++(sleep-75)*0.8
++(steps-7000)/300;
+
+health=clamp(Math.round(health),0,100);
+
+let recovery=(sleep*0.55)+(Math.min(hrv,100)*0.45);
+recovery=clamp(Math.round(recovery),0,100);
+
+let fitnessAge=age
+-(vo2-35)*0.7
+-(hrv-40)*0.10
+-(70-rhr)*0.25
+-(train-3)*0.6;
+
+fitnessAge=Math.round(clamp(fitnessAge,16,90));
+
+let bioAge=age
+-(vo2-35)*0.35
+-(hrv-40)*0.08
+-(sleep-75)*0.12
+-(steps-7000)*0.00025
+-(train-3)*0.4;
+
+if(bmi>30) bioAge+=2;
+if(bmi<25 && bmi>18.5) bioAge-=1;
+
+bioAge=Math.round(clamp(bioAge,16,95));
+
+document.getElementById("health").textContent=health+"/100";
+document.getElementById("fit").textContent=fitnessAge;
+document.getElementById("bio").textContent=bioAge;
+document.getElementById("recovery").textContent=recovery;
+document.getElementById("bmi").textContent=bmi.toFixed(1);
+
+let msg="";
+if(health>=85) msg="مؤشراتك ممتازة جداً.";
+else if(health>=70) msg="مؤشراتك جيدة ويوجد مجال للتحسين.";
+else msg="ركز على النوم والنشاط والتمارين.";
+
+document.getElementById("report").innerHTML=
+"<b>التقييم:</b> "+msg+
+"<br><b>Health Score:</b> "+health+
+"<br><b>Recovery:</b> "+recovery+
+"<br><b>BMI:</b> "+bmi.toFixed(1);
+}
+
+loadData();
+</script>
+</body>
+</html>
