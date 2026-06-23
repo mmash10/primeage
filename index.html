@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PrimeAge</title>
+<style>
+:root{
+--bg:#0B0D12;--card:#151922;--accent:#4F46E5;--green:#22C55E;--orange:#F59E0B;--text:#F8FAFC;--muted:#94A3B8;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,Arial,sans-serif;padding:16px}
+.app{max-width:480px;margin:auto}
+.logo{font-size:34px;font-weight:800;color:var(--accent)}
+.tag{color:var(--muted);margin-bottom:18px}
+.hero,.card{background:var(--card);border-radius:24px;padding:18px;margin-bottom:12px}
+.hero .score{font-size:56px;font-weight:800}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.metric{background:var(--card);border-radius:24px;padding:16px;text-align:center}
+.metric .v{font-size:28px;font-weight:700}
+label{display:block;color:var(--muted);margin-bottom:6px}
+input{width:100%;padding:13px;border:none;border-radius:14px;background:#202533;color:white}
+button{width:100%;padding:16px;border:none;border-radius:18px;background:var(--accent);color:white;font-size:17px;font-weight:700}
+.note{line-height:1.8}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="logo">PrimeAge</div>
+<div class="tag">العمر البيولوجي • Fitness Age • Recovery</div>
+
+<div class="hero">
+<div>Health Score</div>
+<div class="score" id="health">--</div>
+</div>
+
+<div class="grid">
+<div class="metric"><div>Fitness Age</div><div class="v" id="fit">--</div></div>
+<div class="metric"><div>Biological Age</div><div class="v" id="bio">--</div></div>
+</div>
+
+<div class="card"><label>العمر Age</label><input id="age" value="23" type="number"></div>
+<div class="card"><label>VO₂ Max</label><input id="vo2" value="40" type="number"></div>
+<div class="card"><label>HRV (ms)</label><input id="hrv" value="50" type="number"></div>
+<div class="card"><label>Resting Heart Rate</label><input id="rhr" value="65" type="number"></div>
+<div class="card"><label>Sleep Score (0-100)</label><input id="sleep" value="80" type="number"></div>
+<div class="card"><label>Daily Steps</label><input id="steps" value="8000" type="number"></div>
+<div class="card"><label>Training Sessions / Week</label><input id="train" value="4" type="number"></div>
+
+<button onclick="calc()">تحليل البيانات</button>
+
+<div class="card note" id="report"></div>
+</div>
+
+<script>
+function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
+
+function calc(){
+let age=+age.value, vo2=+vo2.value, hrv=+hrv.value, rhr=+rhr.value,
+sleep=+sleep.value, steps=+steps.value, train=+train.value;
+
+// أقرب تقدير عملي ممكن اعتماداً على بيانات اللياقة المتاحة
+let fitnessAge = age
+- ((vo2-35)*0.7)
+- ((hrv-40)*0.10)
+- ((70-rhr)*0.25)
+- ((train-3)*0.6);
+
+fitnessAge=Math.round(clamp(fitnessAge,16,90));
+
+let bioAge = age
+- ((vo2-35)*0.35)
+- ((hrv-40)*0.08)
+- ((sleep-75)*0.12)
+- ((7000-rhr)*0.0004)
+- ((steps-7000)*0.00025)
+- ((train-3)*0.4);
+
+bioAge=Math.round(clamp(bioAge,16,95));
+
+let health=50
++((vo2-35)*2)
++((hrv-40)*0.7)
++((sleep-75)*0.8)
++((steps-7000)/250)
++((70-rhr)*0.8);
+
+health=Math.round(clamp(health,0,100));
+
+healthEl=document.getElementById('health');
+fitEl=document.getElementById('fit');
+bioEl=document.getElementById('bio');
+
+healthEl.innerHTML=health+"/100";
+fitEl.innerHTML=fitnessAge;
+bioEl.innerHTML=bioAge;
+
+let txt="";
+if(health>=85) txt="ممتاز. مؤشراتك تشير إلى صحة ولياقة أعلى من المتوسط.";
+else if(health>=70) txt="جيد جداً. يوجد مجال لتحسين النوم وVO₂ Max.";
+else txt="ركز على النشاط اليومي والنوم والتمارين المنتظمة.";
+
+document.getElementById('report').innerHTML=
+"<b>Recovery Estimate:</b> "+Math.round((sleep+Math.min(hrv,80))/2)+"/100<br><br>"+txt;
+}
+calc();
+</script>
+</body>
+</html>
