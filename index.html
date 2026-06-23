@@ -33,17 +33,16 @@
         }
 
         .logo {
-            width: 72px;
-            height: 72px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #4F46E5, #22C55E);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 38px;
-            font-weight: bold;
-            margin: auto
-        }
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 12px;
+}
+
+.logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
 
         .header {
             text-align: center
@@ -122,8 +121,9 @@
 <body>
     <div class="app">
         <div class="header">
-            <div class="logo">P</div>
-            <h1>PrimeAge</h1>
+<div class="logo">
+    <img src="apple-touch-icon.png" alt="PrimeAge Logo">
+</div>            <h1>PrimeAge</h1>
             <div>Health Intelligence</div>
         </div>
         <div class="ringwrap">
